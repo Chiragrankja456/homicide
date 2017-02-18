@@ -1,0 +1,199 @@
+hc<-read.csv("E:/Analytics/Datasets/hc.csv",header=T)
+
+str(hc)
+
+head(hc)
+
+sapply(hc,class)
+summary(hc)
+
+require(dplyr)
+
+hc.1 <- na.omit(hc[,-c(1:5)])
+
+table(hc.1$Victim.Sex)
+table(hc.1$Victim.Sex)/nrow(hc.1)*100
+
+
+## More male victims
+
+table(hc.1$Perpetrator.Sex)
+table(hc.1$Perpetrator.Sex)/nrow(hc.1)*100
+
+## More male Perpetrator
+
+## Month has no relation to Crime. Almost 9% crime has been spread over each month
+
+sort(table(hc.1$Month)/nrow(hc.1)*100,decreasing=T)
+
+## Top 10 state by % of Crime, CA tops
+
+head(sort(table(hc.1$State)/nrow(hc.1)*100,decreasing=T),n=10)
+
+## White & Black are victimized the most
+
+hc.1 %>% group_by(Victim.Race) %>% count(sort=T)%>% mutate(percentage=n/nrow(hc.1)*100)
+
+## Most victims are Not Hispanic
+
+hc.1 %>% group_by(Victim.Ethnicity) %>% count(sort=T)%>% mutate(percentage=n/nrow(hc.1)*100)
+
+## Crime solved by ethnicity
+
+table(hc.1$Crime.Solved)
+
+hc.1 %>% group_by(Victim.Ethnicity,Crime.Solved) %>% count(sort=T)
+
+## Not hispanic crime = 197499, Solved = 145580; Success = 73.7%
+
+nh.cs<-(145580/197499)*100
+
+## Hispanic crime = 72652, Solved = 47560; Success = 65.4%
+
+h.cs<-(47560/72652)*100
+
+## Success overall = 448172 over = 190282+448172 ; Success = 70.2%
+
+success <- 448172/(190282+448172)*100
+
+## Crime solving isn't partial
+
+## Let's first prepare the data for classification models
+
+pca<-princomp(hc.pca,cor=T,score=T)
+
+## We need numbers instead of State names
+
+## How many states are there?
+
+class(hc.1$State)
+
+## This will show the states ordered in alphabetical order
+
+## Let's replace state names by numbers
+
+for (i in 1:51) {
+  levels(hc.1$State)[i] <- i
+}
+
+View(hc.1)
+
+## The same process has to be done for Months also.
+
+cm<-c("January","February","March","April",
+      "May","June","July","August","September",
+      "October","November","December")
+
+hc.1$Month<-factor(hc.1$Month,levels=cm)
+
+levels(hc.1$Month)
+
+for (i in 1:12) {
+  levels(hc.1$Month)[i] <- i
+}
+
+##...same for Crime.Type, Crime.Solved & Victim.Sex
+
+for (i in 1:2) {
+  levels(hc.1$Crime.Type)[i] <- i
+}
+
+
+for (i in 1:2) {
+  levels(hc.1$Crime.Solved)[i] <- i
+}
+
+
+for (i in 1:3) {
+  levels(hc.1$Victim.Sex)[i] <- i
+}
+
+
+##...continuing with Race, Ethnicity, Perpetrator Sex,Race & Ethnicity
+
+levels(hc.1$Victim.Race)
+
+for (i in 1:5) {
+  levels(hc.1$Victim.Race)[i] <- i
+}
+
+levels(hc.1$Victim.Ethnicity)
+
+for (i in 1:3) {
+  levels(hc.1$Victim.Ethnicity)[i] <- i
+}
+
+levels(hc.1$Perpetrator.Sex)
+
+for (i in 1:3) {
+  levels(hc.1$Perpetrator.Sex)[i] <- i
+}
+
+levels(hc.1$Perpetrator.Race)
+
+for (i in 1:5) {
+  levels(hc.1$Perpetrator.Race)[i] <- i
+}
+
+
+levels(hc.1$Perpetrator.Ethnicity)
+
+for (i in 1:3) {
+  levels(hc.1$Perpetrator.Ethnicity)[i] <- i
+}
+
+##...finally decoding Relationship & Weapon
+
+
+levels(hc.1$Relationship)
+
+for (i in 1:28) {
+  levels(hc.1$Relationship)[i] <- i
+}
+
+levels(hc.1$Weapon)
+
+for (i in 1:16) {
+  levels(hc.1$Weapon)[i] <- i
+}
+
+hc.1<-hc.1[,-19]
+
+dim(hc.1)
+
+str(hc.1)
+
+##...data is ready now...
+
+##...no wait ! forgot to convert all variables to Numeric
+
+hc.2<-as.data.frame(sapply(hc.1,as.numeric))
+
+##...tadaaaa...!!
+
+hc.3<-round(cor(hc.2,hc.2),digits = 2)
+
+View(hc.3)
+
+hc.4<-as.data.frame(hc.3)
+View(hc.4)
+
+
+##...this can be a little more easy to read using Heatmaps
+
+heatmap(hc.3,Rowv = NA,Colv = NA,col=cm.colors(226),scale = "row")
+
+
+plot_ly(z=hc.3,type = "surface",
+        x=row.names(hc.3),y=colnames(hc.3),
+        size = c(10,100),showscale=T,reversescale=F,
+        opacity=1,cauto=F,
+        colorscale=([0, 'rgb(0,0,255)', [1, 'rgb(255,0,0)']))
+
+
+
+
+
+
+
+
